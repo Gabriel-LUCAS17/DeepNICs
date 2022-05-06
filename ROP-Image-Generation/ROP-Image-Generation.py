@@ -175,7 +175,7 @@ if __name__ == '__main__':
     List_Args_Save_Images_By_Cluster = [(var, results_path, cluster_path) for var in list_var]
     List_Args_Transform_Images = [(var, results_path) for var in list_var]
     List_Args_Fuse_Images = [(var, width, height, results_path) for var in list_var]
-    List_Args_Save_Fuse_Images = [(var, results_path, save_fuse_path) for var in list_var]
+    List_Args_Save_Fuse_Images = [(var, results_path, save_fuse_path, width, height) for var in list_var]
 
     t0 = time.time()
     # Parallel execution.

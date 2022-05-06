@@ -118,7 +118,7 @@ def saveImageByCluster(var, NIC, image_path, res_path, cluster_path) :
     fig.write_image(image_name)
     pio.orca.shutdown_server()
     
-def saveFuseImage(var, image_path, save_path) :
+def saveFuseImage(var, image_path, save_path, width, height) :
     """
     Saves a .csv Fuse-Image file into .png.
 
@@ -133,8 +133,7 @@ def saveFuseImage(var, image_path, save_path) :
 
     # Import .csv image file.
     #data = pd.read_csv(image_path, sep=";", header=None, dtype=np.float32)
-    height = 9
-    width = 4
+
     data = np.ones((height*8, width*12,3))
     coords = np.array(np.meshgrid(np.arange(8),np.arange(12))).T.reshape(-1,2)
     np.random.seed(10)              # Generate fixed random order
@@ -224,7 +223,7 @@ def saveImagesByCluster(var, res_path, cluster_path) :
         saveImageByCluster(var, NIC, image_path, res_path, cluster_path)
         
 # Parallelizable function. One processor for each stratified variable.
-def saveFuseImages(var, res_path, save_path) :
+def saveFuseImages(var, res_path, save_path, width, height) :
     """
     Calls saveFuseImage for given stratified variable.
 
@@ -239,7 +238,7 @@ def saveFuseImages(var, res_path, save_path) :
 
     #image_path = res_path + "a" + str(var) + "\\Images\\Fuse\\" + str(var) + ".csv"
     image_path = res_path + "a" + str(var) + "\\Images\\"
-    saveFuseImage(var, image_path, save_path)
+    saveFuseImage(var, image_path, save_path, width, height)
 
 
 
