@@ -10,15 +10,7 @@ Author: Mathieu Brunner.
 import numpy as np
 import os
 import pandas as pd
-import plotly.express as px
-import plotly.io as pio
-import plotly.io._orca
-
-# Disable the orca response timeout.
-import retrying
-unwrapped = plotly.io._orca.request_image_with_retrying.__wrapped__
-wrapped = retrying.retry(wait_random_min=1000)(unwrapped)
-plotly.io._orca.request_image_with_retrying = wrapped
+import cv2
 
 #%% Function definition.
 
@@ -63,24 +55,10 @@ def saveImage(var, NIC, image_path, save_path) :
 
     # Import .csv image file.
     data = pd.read_csv(image_path, sep=";", header=None, dtype=np.float32)
-
-    # Get image size.
-    n,p = data.shape
-
-    # Plot image.
-    fig  = px.imshow(data, labels=dict(x="Range of range of simulation",
-                                       y="Number of selected variables",
-                                       color="NIC1 value"),
-                     x=[str(i) for i in range(3,p+3)],
-                     y=[str(i) for i in range(n+2,2,-1)],
-                     zmin=0, zmax=1, color_continuous_scale='gray_r')
-    fig.update_layout( title={ 'text': f"Stratified variable {var} - NIC1",
-                               'y':0.975, 'x':0.5, 'xanchor': 'center', 'yanchor': 'top'})
-
+    data = np.array(data)
     # Save image.
     image_name = save_path + "NIC" + str(NIC) + "/" + str(var) + ".jpg"
-    fig.write_image(image_name)
-    pio.orca.shutdown_server()
+    cv2.imwrite(image_name,data)
 
 def saveImageByCluster(var, NIC, image_path, res_path, cluster_path) :
     """
@@ -98,25 +76,11 @@ def saveImageByCluster(var, NIC, image_path, res_path, cluster_path) :
 
     # Import .csv image file.
     data = pd.read_csv(image_path, sep=";", header=None, dtype=np.float32)
-
-    # Get image size.
-    n,p = data.shape
-
-    # Plot image.
-    fig  = px.imshow(data, labels=dict(x="Range of range of simulation",
-                                       y="Number of selected variables",
-                                       color="Rate of trained data"),
-                     x=[str(i) for i in range(3,p+3)],
-                     y=[str(i) for i in range(n+2,2,-1)],
-                     zmin=0, zmax=1, color_continuous_scale='gray_r')
-    fig.update_layout( title={ 'text': f"Stratified variable {var} - NIC1",
-                               'y':1.0, 'x':0.5, 'xanchor': 'center', 'yanchor': 'top'})
-
+    data = np.array(data)
     # Save image.
     cluster_id = getClusterId(var, cluster_path)
     image_name = res_path + "ImagesPNG/NIC" + str(NIC) + "/" + str(cluster_id) + "/" + str(var) + ".jpg"
-    fig.write_image(image_name)
-    pio.orca.shutdown_server()
+    cv2.imwrite(image_name,data)
     
 def saveFuseImage(var, image_path, save_path, width, height) :
     """
@@ -143,29 +107,19 @@ def saveFuseImage(var, image_path, save_path, width, height) :
     for i in range(96):
         NIC = pd.read_csv(image_path + "NIC" + str(i+1) + "\\" + str(var) + ".csv",sep=";",header=None,dtype=np.float32)
         if i in range(10):
-            data[coords[i,0]*height:(coords[i,0]+1)*height,coords[i,1]*width:(coords[i,1]+1)*width,0] = 1-NIC
             data[coords[i,0]*height:(coords[i,0]+1)*height,coords[i,1]*width:(coords[i,1]+1)*width,1] = 1-NIC
+            data[coords[i,0]*height:(coords[i,0]+1)*height,coords[i,1]*width:(coords[i,1]+1)*width,2] = 1-NIC
         if i == 0 or i in range(10,30):
             data[coords[i,0]*height:(coords[i,0]+1)*height,coords[i,1]*width:(coords[i,1]+1)*width,0] = 1-NIC
             data[coords[i,0]*height:(coords[i,0]+1)*height,coords[i,1]*width:(coords[i,1]+1)*width,2] = 1-NIC
         if i in range(30,96):
+            data[coords[i,0]*height:(coords[i,0]+1)*height,coords[i,1]*width:(coords[i,1]+1)*width,0] = 1-NIC
             data[coords[i,0]*height:(coords[i,0]+1)*height,coords[i,1]*width:(coords[i,1]+1)*width,1] = 1-NIC
-            data[coords[i,0]*height:(coords[i,0]+1)*height,coords[i,1]*width:(coords[i,1]+1)*width,2] = 1-NIC
-    # Get image size.
-    #n,p = data.shape
-
-    # Plot image.
-    #fig  = px.imshow(data, labels=dict(color="Value"),
-    #                 zmin=0, zmax=1, color_continuous_scale='gray_r')
-    fig = px.imshow(data)
-    fig.update_layout( title={ 'text': f"Stratified variable {var}",
-                               'y':0.975, 'x':0.5, 'xanchor': 'center', 'yanchor': 'top'},
-                       xaxis={ 'showticklabels':False}, yaxis={ 'showticklabels':False})
-
+    data = 255.0 * (data - data.min())/(data.max() - data.min())
+    data = data.astype(np.uint8)
     # Save image.
-    image_name = save_path + str(var) + ".jpg"
-    fig.write_image(image_name)
-    pio.orca.shutdown_server()
+    image_name = save_path + str(var) + ".png"
+    cv2.imwrite(image_name,data)
 
 def deleteImages(path) :
     """
