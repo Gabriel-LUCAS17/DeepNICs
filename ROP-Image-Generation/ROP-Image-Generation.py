@@ -212,7 +212,7 @@ if __name__ == '__main__':
     # Parallel execution.
     with Pool(N_proc) as p:
         print("Saving generated ROP-Images.")
-        p.starmap(saveImages, List_Args_Save_Images)
+        #p.starmap(saveImages, List_Args_Save_Images)
         #p.starmap(saveImagesByCluster, List_Args_Save_Images_By_Cluster)
         print("Saving Fuse-Images.")
         p.starmap(saveFuseImages, List_Args_Save_Fuse_Images)
