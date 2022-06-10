@@ -13,3 +13,4 @@ pandas
 plotly
 numpy
 scikit_learn
+python-opencv
